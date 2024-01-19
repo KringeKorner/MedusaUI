@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="MedusaUI.jnlp">
+  <information>
+    <title>MedusaUI</title>
+    <vendor>mdany</vendor>
+    <description>null</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="lib\MedusaUISplash.jar" size="2881" download="progress" />
+    <jar href="MedusaUI.jar" size="72872" download="eager" />
+    <jar href="lib\sqlite-jdbc-3.34.0.jar" size="7296329" download="eager" />
+  </resources>
+  <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="MedusaUI" >
+    <param name="requiredFXVersion" value="8.0+"/>
+  </applet-desc>
+  <jfx:javafx-desc  width="800" height="600" main-class="MedusaUIPackage.MedusaUICore"  name="MedusaUI"  preloader-class="medusauisplash.MedusaUISplash"/>
+  <update check="always"/>
+</jnlp>
