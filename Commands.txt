@@ -1,0 +1,102 @@
+--DROP TABLES
+DROP TABLE records_to;
+DROP TABLE loads_to;
+DROP TABLE updated_by;
+DROP TABLE created_by;
+DROP TABLE defines;
+DROP TABLE writes_to;
+DROP TABLE saved_to;
+DROP TABLE associated_with;
+DROP TABLE uploaded_to;
+DROP TABLE added_to;
+DROP TABLE accessed_by;
+DROP TABLE chat_log;
+DROP TABLE change_log;
+DROP TABLE chatSession;
+DROP TABLE config;
+DROP TABLE dictionary;
+DROP TABLE profile;
+DROP TABLE save;
+
+--CLEARING TABLE
+TRUNCATE TABLE records_to;
+TRUNCATE TABLE loads_to;
+TRUNCATE TABLE updated_by;
+TRUNCATE TABLE defines;
+TRUNCATE TABLE writes_to;
+TRUNCATE TABLE saved_to;
+TRUNCATE TABLE associated_with;
+TRUNCATE TABLE uploaded_to;
+TRUNCATE TABLE added_to;
+TRUNCATE TABLE accessed_by;
+TRUNCATE TABLE chat_log;
+TRUNCATE TABLE change_log;
+TRUNCATE TABLE chatSession;
+TRUNCATE TABLE config;
+TRUNCATE TABLE dictionary;
+TRUNCATE TABLE profile;
+TRUNCATE TABLE save;
+--DATA TEST
+--SELECT TO_CHAR(SaveTime, 'YYYY/MM/DD HH24:MM:SS') FROM save;
+
+--QUERIES
+--LIST EXISTING PROFILES
+SELECT * FROM profile;
+--FIND LAST UPDATE
+SELECT * FROM change_log 
+WHERE LastUpdated IN (SELECT MAX (LastUpdated) FROM change_log);
+--SEARCH IF WORD WAS ENTERED INTO ANY DICTIONARY
+SELECT DictionaryId, DictionaryEntry FROM dictionary WHERE DictionaryEntry = 'That''s unfortunate.';
+--MOST COMMON PROFILE CHATTED WITH
+SELECT p.ProfileId, Count(s.SaveId)
+FROM accessed_by p
+LEFT JOIN save s
+    LEFT JOIN added_to a
+        LEFT JOIN chat_log c
+        ON a.ChatLogId = c.ChatLogId
+    ON s.SaveID = a.SaveId
+ON p.SaveId = s.SaveId
+WHERE ROWNUM < 2
+GROUP BY p.ProfileId
+ORDER BY COUNT(c.ChatLogId) DESC;
+--FIND WORD WITH MOST CONTEXT TAGS
+SELECT DictionaryId, DictionaryEntry, MAX((length(Context) - length(replace(Context, ',', '')) +1)) ContextCount
+FROM dictionary
+GROUP BY DictionaryId, DictionaryEntry
+ORDER BY ContextCount DESC;
+--HOW LONG DID IT TAKE FOR A DEEP CONFIGURATION
+SELECT ChangeLogId, ChangeType, CURRENT_TIMESTAMP(2) - LastUpdated AS TimeForCreation
+FROM change_log
+WHERE ChangeType = 'Profile creation';
+--HOW LONG DID A CHAT SESSION LAST WITH A PROFILE
+SELECT ChatLogId, CURRENT_TIMESTAMP(2) - MessageTimeStamp AS TimeForCreation
+FROM chat_log;
+--WHAT IS THE CURRENT CONFIGURATION FOR A PROFILE
+SELECT p.Name, c.ConfigAttribute
+FROM profile p
+LEFT JOIN defines d
+    LEFT JOIN config c
+    ON d.ConfigurationId = c.ConfigurationId
+ON p.ProfileId = d.ProfileId
+WHERE p.Name = 'Ace';
+--WHAT SAVES DOES A PROFILE HAVE
+SELECT p.Name, s.SaveId
+FROM profile p
+LEFT JOIN accessed_by s
+ON p.ProfileId = s.ProfileId
+WHERE p.Name = 'Melusi';
+--FIND THE NAMES OF PROFILES THAT HAD SUCCESSFUL SESSION CLOSURES
+SELECT p.Name, l.SessionState
+FROM profile p
+--Get chat open time
+SELECT change_log.ChangeLogId, change_log.RecordedChange, change_log.ChangeType, change_log.LastUpdated FROM change_log
+INNER JOIN saved_to ON saved_to.ChangeLogId = change_log.ChangeLogId
+INNER JOIN save ON save.SaveId = saved_to.SaveId
+INNER JOIN accessed_by ON accessed_by.SaveId = save.SaveId
+INNER JOIN profile ON profile.ProfileId = accessed_by.ProfileId
+INNER JOIN writes_to ON writes_to.SaveId = save.SaveId
+INNER JOIN config ON config.ConfigurationId = writes_to.ConfigurationId
+WHERE profile.Name = "Athena" AND config.CoreId = 6001 AND change_log.RecordedChange = "Session Opened"
+LEFT JOIN loads_to l
+ON p.ProfileId = l.ProfileId
+WHERE l.SessionState = 'CLOSED';

@@ -1,0 +1,473 @@
+--CREATE ENTITIES
+CREATE TABLE save (
+    SaveId int NOT NULL PRIMARY KEY, 
+    SaveState nvarchar2(20) NOT NULL, 
+    SaveTime TEXT NOT NULL
+);
+
+CREATE TABLE profile (
+    ProfileId int NOT NULL PRIMARY KEY,
+    Name nvarchar2(100) NOT NULL,
+    Type nvarchar2(20) NOT NULL
+);
+
+CREATE TABLE dictionary (
+    DictionaryId int NOT NULL PRIMARY KEY,
+    DictionaryEntry nvarchar2(200) NOT NULL,
+    Context nvarchar2(800) NOT NULL,
+    EmotionalInflection nvarchar2(800),
+    UpdateType nvarchar2(20) NOT NULL
+);
+
+CREATE TABLE config (
+    ConfigurationId int NOT NULL PRIMARY KEY,
+    CoreId int NOT NULL UNIQUE,
+    ConfigAttribute nvarchar2(200) NOT NULL,
+    AttributeModification nvarchar2(50) NOT NULL
+);
+
+CREATE TABLE chatSession (
+    SessionId int NOT NULL PRIMARY KEY,
+    SessionState nvarchar2(20) NOT NULL
+);
+
+CREATE TABLE change_log (
+    ChangeLogId int NOT NULL PRIMARY KEY,
+    RecordedChange nvarchar2(200) NOT NULL,
+    ChangeType nvarchar2(30) NOT NULL,
+    LastUpdated TEXT NOT NULL
+);
+
+CREATE TABLE chat_log (
+    ChatLogId int NOT NULL PRIMARY KEY,
+    StoredMessage nvarchar2(400) NOT NULL,
+    MessageSource nvarchar2(100) NOT NULL,
+    MessageTimestamp TEXT NOT NULL
+);
+--CREATE RELATIONS
+CREATE TABLE accessed_by (
+    SaveId int NOT NULL PRIMARY KEY,
+    ProfileId int NOT NULL,
+    Type nvarchar2(20) NOT NULL,
+    FOREIGN KEY (SaveId)
+        REFERENCES save (SaveId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ProfileId)
+        REFERENCES profile (ProfileId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE added_to (
+    ChatLogId int NOT NULL PRIMARY KEY,
+    SaveId int NOT NULL,
+    FOREIGN KEY (ChatLogId)
+        REFERENCES chat_log (ChatLogId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE uploaded_to(
+    DictionaryId int NOT NULL PRIMARY KEY,
+    SaveId int NOT NULL,
+    UpdateType nvarchar2(20) NOT NULL,
+    FOREIGN KEY (DictionaryId)
+        REFERENCES dictionary (DictionaryId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE associated_with(
+    DictionaryId int NOT NULL PRIMARY KEY,
+    ProfileId int NOT NULL,
+    Type nvarchar2(20) NOT NULL,
+    FOREIGN KEY (DictionaryId)
+        REFERENCES dictionary (DictionaryId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE saved_to(
+    ChangeLogId int NOT NULL PRIMARY KEY,
+    SaveId int NOT NULL ,
+    ChangeType nvarchar2(30) NOT NULL,
+    FOREIGN KEY (ChangeLogId)
+        REFERENCES change_log (ChangeLogId)
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE writes_to(
+    SaveId int NOT NULL PRIMARY KEY,
+    ConfigurationId int NOT NULL,
+    CoreId int NOT NULL,
+    ConfigAttribute nvarchar2(200) NOT NULL,
+    FOREIGN KEY (SaveId)
+        REFERENCES save (SaveId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ConfigurationId)
+        REFERENCES config (ConfigurationId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (CoreId)
+        REFERENCES config (CoreId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE defines(
+    ProfileId int NOT NULL PRIMARY KEY,
+    ConfigurationId int NOT NULL,
+    FOREIGN KEY (ProfileId)
+        REFERENCES profile (ProfileId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ConfigurationId)
+        REFERENCES config (ConfigurationId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE created_by(
+    DictionaryId int NOT NULL PRIMARY KEY,
+    SessionState nvarchar2(20) NOT NULL,
+    SessionId int NOT NULL,
+    UpdateType nvarchar2(20) NOT NULL,
+    FOREIGN KEY (SessionId)
+        REFERENCES chatSession (SessionId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (DictionaryId)
+        REFERENCES dictionary (DictionaryId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE updated_by(
+    ChangeLogId int NOT NULL PRIMARY KEY,
+    ConfigurationId int NOT NULL,
+    CoreId int NOT NULL,
+    AttributeModification nvarchar2(50) NOT NULL,
+    FOREIGN KEY (ChangeLogId)
+        REFERENCES change_log (ChangeLogId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ConfigurationId)
+        REFERENCES config (ConfigurationId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (CoreId)
+        REFERENCES config (CoreId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE loads_to(
+    SessionId int NOT NULL PRIMARY KEY,
+    ProfileId int NOT NULL,
+    SessionState nvarchar2(20) NOT NULL,
+    FOREIGN KEY (SessionId)
+        REFERENCES chatSession (SessionId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (ProfileId)
+        REFERENCES profile (ProfileId)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE records_to(
+    ChatLogId int NOT NULL PRIMARY KEY,
+    SessionId int NOT NULL,
+    FOREIGN KEY (ChatLogId)
+        REFERENCES chat_log (ChatLogId)
+        ON DELETE CASCADE,
+    FOREIGN KEY (SessionId)
+        REFERENCES chatSession (SessionId)
+        ON DELETE CASCADE
+);
+--ADD VALUES
+--SAVE
+INSERT INTO save VALUES (2000, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2001, 'SUCCESS', DATETIME('2023-04-02 18:31:00.00'));
+INSERT INTO save VALUES (2002, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2003, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2004, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2005, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2006, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2007, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2008, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO save VALUES (2009, 'SUCCESS', DATETIME('2023-03-07 15:45:20.00'));
+
+--PROFILE
+INSERT INTO profile VALUES (1000, 'Medusa', 'PRESET');
+INSERT INTO profile VALUES (1001, 'Athena', 'PRESET');
+INSERT INTO profile VALUES (1002, 'Dom', 'PRESET');
+INSERT INTO profile VALUES (1003, 'Marley', 'PRESET');
+INSERT INTO profile VALUES (1004, 'Gemini', 'PRESET');
+INSERT INTO profile VALUES (1005, 'Ace', 'PRESET');
+INSERT INTO profile VALUES (1006, 'Juicy', 'PRESET');
+INSERT INTO profile VALUES (1007, 'Generic greeter', 'PRESET');
+INSERT INTO profile VALUES (1008, 'Test1', 'PRESET');
+INSERT INTO profile VALUES (1009, 'ChatterV2', 'PRESET');
+
+--DICTIONARY
+INSERT INTO dictionary VALUES (30000001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30000002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30000003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30010001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30010002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30010003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30020001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30020002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30020003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30030001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30030002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30030003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30040001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30040002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30040003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30050001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30050002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30050003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30060001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30060002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30060003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30070001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30070002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30070003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30080001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30080002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30080003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30090001, 'Hello', 'intro, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30090002, 'Goodbye', 'terminator, response', 'neutral', 'Final');
+INSERT INTO dictionary VALUES (30090003, 'Lovely weather', 'fluff', 'neutral', 'Final');
+
+--CONFIG
+INSERT INTO config VALUES (5000, 6000, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.9, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5001, 6001, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.9, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5002, 6002, 'Happiness 0.7, Sadness 0.5, Insignificance 0.5, Anger 0.2, Curiosity 0.9, Distaste 0.4, Spontinaety 0.7, Sarcasm 0.9', 'Personality created');
+INSERT INTO config VALUES (5003, 6003, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5004, 6004, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5005, 6005, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5006, 6006, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5007, 6007, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5008, 6008, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+INSERT INTO config VALUES (5009, 6009, 'Happiness 0.7, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5', 'Personality created');
+
+--CHATSESSION
+INSERT INTO chatSession VALUES (40000001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40010001, 'CLOSED');
+INSERT INTO chatSession VALUES (40020001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40030001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40040001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40050001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40060001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40070001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40080001, 'ACTIVE');
+INSERT INTO chatSession VALUES (40090001, 'ACTIVE');
+
+--CHANGE_LOG
+INSERT INTO change_log VALUES (70000001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70010001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70010002, 'Session Opened', 'Session update', DATETIME('2023-04-02 19:45:00.00'));
+INSERT INTO change_log VALUES (70010003, 'Session Closed', 'Session update', DATETIME('2023-04-02 20:00:00.00'));
+INSERT INTO change_log VALUES (70020001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70030001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70040001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70050001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70060001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70070001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70080001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+INSERT INTO change_log VALUES (70090001, 'Created personality', 'Profile creation', DATETIME('2023-03-07 15:45:20.00'));
+
+--CHAT_LOG
+INSERT INTO chat_log VALUES (80000001, 'Hi', 'Medusa', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80010001, 'Hi', 'Athena', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80020001, 'Hi', 'Dom', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80030001, 'Hi', 'Marley', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80040001, 'Hi', 'Gemini', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80050001, 'Hi', 'Ace', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80060001, 'Hi', 'Juicy', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80070001, 'Hi', 'Generic greeter', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80080001, 'Hi', 'Test1', DATETIME('2023-03-07 14:45:20.00'));
+INSERT INTO chat_log VALUES (80090001, 'Hi', 'ChatterV2', DATETIME('2023-03-07 14:45:20.00'));
+
+--ACCESSED_BY
+INSERT INTO accessed_by VALUES (2000, 1000, 'PRESET');
+INSERT INTO accessed_by VALUES (2001, 1001, 'PRESET');
+INSERT INTO accessed_by VALUES (2002, 1002, 'PRESET');
+INSERT INTO accessed_by VALUES (2003, 1003, 'PRESET');
+INSERT INTO accessed_by VALUES (2004, 1004, 'PRESET');
+INSERT INTO accessed_by VALUES (2005, 1005, 'PRESET');
+INSERT INTO accessed_by VALUES (2006, 1006, 'PRESET');
+INSERT INTO accessed_by VALUES (2007, 1007, 'PRESET');
+INSERT INTO accessed_by VALUES (2008, 1008, 'PRESET');
+INSERT INTO accessed_by VALUES (2009, 1009, 'PRESET');
+
+--ADDED_TO
+INSERT INTO added_to VALUES (80000001, 2000);
+INSERT INTO added_to VALUES (80010001, 2001);
+INSERT INTO added_to VALUES (80020001, 2002);
+INSERT INTO added_to VALUES (80030001, 2003);
+INSERT INTO added_to VALUES (80040001, 2004);
+INSERT INTO added_to VALUES (80050001, 2005);
+INSERT INTO added_to VALUES (80060001, 2006);
+INSERT INTO added_to VALUES (80070001, 2007);
+INSERT INTO added_to VALUES (80080001, 2008);
+INSERT INTO added_to VALUES (80090001, 2009);
+
+--UPLOADED_TO
+INSERT INTO uploaded_to VALUES (30000001, 2000, 'Final');
+INSERT INTO uploaded_to VALUES (30000002, 2000, 'Final');
+INSERT INTO uploaded_to VALUES (30000003, 2000, 'Final');
+INSERT INTO uploaded_to VALUES (30010001, 2001, 'Final');
+INSERT INTO uploaded_to VALUES (30010002, 2001, 'Final');
+INSERT INTO uploaded_to VALUES (30010003, 2001, 'Final');
+INSERT INTO uploaded_to VALUES (30020001, 2002, 'Final');
+INSERT INTO uploaded_to VALUES (30020002, 2002, 'Final');
+INSERT INTO uploaded_to VALUES (30020003, 2002, 'Final');
+INSERT INTO uploaded_to VALUES (30030001, 2003, 'Final');
+INSERT INTO uploaded_to VALUES (30030002, 2003, 'Final');
+INSERT INTO uploaded_to VALUES (30030003, 2003, 'Final');
+INSERT INTO uploaded_to VALUES (30040001, 2004, 'Final');
+INSERT INTO uploaded_to VALUES (30040002, 2004, 'Final');
+INSERT INTO uploaded_to VALUES (30040003, 2004, 'Final');
+INSERT INTO uploaded_to VALUES (30050001, 2005, 'Final');
+INSERT INTO uploaded_to VALUES (30050002, 2005, 'Final');
+INSERT INTO uploaded_to VALUES (30050003, 2005, 'Final');
+INSERT INTO uploaded_to VALUES (30060001, 2006, 'Final');
+INSERT INTO uploaded_to VALUES (30060002, 2006, 'Final');
+INSERT INTO uploaded_to VALUES (30060003, 2006, 'Final');
+INSERT INTO uploaded_to VALUES (30070001, 2007, 'Final');
+INSERT INTO uploaded_to VALUES (30070002, 2007, 'Final');
+INSERT INTO uploaded_to VALUES (30070003, 2007, 'Final');
+INSERT INTO uploaded_to VALUES (30080001, 2008, 'Final');
+INSERT INTO uploaded_to VALUES (30080002, 2008, 'Final');
+INSERT INTO uploaded_to VALUES (30080003, 2008, 'Final');
+INSERT INTO uploaded_to VALUES (30090001, 2009, 'Final');
+INSERT INTO uploaded_to VALUES (30090002, 2009, 'Final');
+INSERT INTO uploaded_to VALUES (30090003, 2009, 'Final');
+
+--ASSOCIATED_WITH
+INSERT INTO associated_with VALUES (30000001, 1000, 'PRESET');
+INSERT INTO associated_with VALUES (30000002, 1000, 'PRESET');
+INSERT INTO associated_with VALUES (30000003, 1000, 'PRESET');
+INSERT INTO associated_with VALUES (30010001, 1001, 'PRESET');
+INSERT INTO associated_with VALUES (30010002, 1001, 'PRESET');
+INSERT INTO associated_with VALUES (30010003, 1001, 'PRESET');
+INSERT INTO associated_with VALUES (30020001, 1002, 'PRESET');
+INSERT INTO associated_with VALUES (30020002, 1002, 'PRESET');
+INSERT INTO associated_with VALUES (30020003, 1002, 'PRESET');
+INSERT INTO associated_with VALUES (30030001, 1003, 'PRESET');
+INSERT INTO associated_with VALUES (30030002, 1003, 'PRESET');
+INSERT INTO associated_with VALUES (30030003, 1003, 'PRESET');
+INSERT INTO associated_with VALUES (30040001, 1004, 'PRESET');
+INSERT INTO associated_with VALUES (30040002, 1004, 'PRESET');
+INSERT INTO associated_with VALUES (30040003, 1004, 'PRESET');
+INSERT INTO associated_with VALUES (30050001, 1005, 'PRESET');
+INSERT INTO associated_with VALUES (30050002, 1005, 'PRESET');
+INSERT INTO associated_with VALUES (30050003, 1005, 'PRESET');
+INSERT INTO associated_with VALUES (30060001, 1006, 'PRESET');
+INSERT INTO associated_with VALUES (30060002, 1006, 'PRESET');
+INSERT INTO associated_with VALUES (30060003, 1006, 'PRESET');
+INSERT INTO associated_with VALUES (30070001, 1007, 'PRESET');
+INSERT INTO associated_with VALUES (30070002, 1007, 'PRESET');
+INSERT INTO associated_with VALUES (30070003, 1007, 'PRESET');
+INSERT INTO associated_with VALUES (30080001, 1008, 'PRESET');
+INSERT INTO associated_with VALUES (30080002, 1008, 'PRESET');
+INSERT INTO associated_with VALUES (30080003, 1008, 'PRESET');
+INSERT INTO associated_with VALUES (30090001, 1009, 'PRESET');
+INSERT INTO associated_with VALUES (30090002, 1009, 'PRESET');
+INSERT INTO associated_with VALUES (30090003, 1009, 'PRESET');
+
+--SAVED_TO
+INSERT INTO saved_to VALUES (70000001, 2000, 'Profile creation');
+INSERT INTO saved_to VALUES (70010001, 2001, 'Profile creation');
+INSERT INTO saved_to VALUES (70010002, 2001, 'Session update');
+INSERT INTO saved_to VALUES (70010003, 2001, 'Session update');
+INSERT INTO saved_to VALUES (70020001, 2002, 'Profile creation');
+INSERT INTO saved_to VALUES (70030001, 2003, 'Profile creation');
+INSERT INTO saved_to VALUES (70040001, 2004, 'Profile creation');
+INSERT INTO saved_to VALUES (70050001, 2005, 'Profile creation');
+INSERT INTO saved_to VALUES (70060001, 2006, 'Profile creation');
+INSERT INTO saved_to VALUES (70070001, 2007, 'Profile creation');
+INSERT INTO saved_to VALUES (70080001, 2008, 'Profile creation');
+INSERT INTO saved_to VALUES (70090001, 2009, 'Profile creation');
+
+--WRITES_TO
+INSERT INTO writes_to VALUES (2000, 5000, 6000, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.9, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2001, 5001, 6001, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.9, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2002, 5002, 6002, 'Happiness 0.7, Sadness 0.5, Insignificance 0.5, Anger 0.2, Curiosity 0.9, Distaste 0.4, Spontinaety 0.7, Sarcasm 0.9');
+INSERT INTO writes_to VALUES (2003, 5003, 6003, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2004, 5004, 6004, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2005, 5005, 6005, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2006, 5006, 6006, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2007, 5007, 6007, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2008, 5008, 6008, 'Happiness 0.5, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+INSERT INTO writes_to VALUES (2009, 5009, 6009, 'Happiness 0.7, Sadness 0.5, Insignificance 0.5, Anger 0.5, Curiosity 0.5, Distaste 0.5, Spontinaety 0.5, Sarcasm 0.5');
+
+--DEFINES
+INSERT INTO defines VALUES (1000, 5000);
+INSERT INTO defines VALUES (1001, 5001);
+INSERT INTO defines VALUES (1002, 5002);
+INSERT INTO defines VALUES (1003, 5003);
+INSERT INTO defines VALUES (1004, 5004);
+INSERT INTO defines VALUES (1005, 5005);
+INSERT INTO defines VALUES (1006, 5006);
+INSERT INTO defines VALUES (1007, 5007);
+INSERT INTO defines VALUES (1008, 5008);
+INSERT INTO defines VALUES (1009, 5009);
+
+--CREATED_BY
+INSERT INTO created_by VALUES (30000001, 'ACTIVE', 40000001, 'Final');
+INSERT INTO created_by VALUES (30000002, 'ACTIVE', 40000001, 'Final');
+INSERT INTO created_by VALUES (30000003, 'ACTIVE', 40000001, 'Final');
+INSERT INTO created_by VALUES (30010001, 'CLOSED', 40010001, 'Final');
+INSERT INTO created_by VALUES (30010002, 'CLOSED', 40010001, 'Final');
+INSERT INTO created_by VALUES (30010003, 'CLOSED', 40010001, 'Final');
+INSERT INTO created_by VALUES (30020001, 'ACTIVE', 40020001, 'Final');
+INSERT INTO created_by VALUES (30020002, 'ACTIVE', 40020001, 'Final');
+INSERT INTO created_by VALUES (30020003, 'ACTIVE', 40020001, 'Final');
+INSERT INTO created_by VALUES (30030001, 'ACTIVE', 40030001, 'Final');
+INSERT INTO created_by VALUES (30030002, 'ACTIVE', 40030001, 'Final');
+INSERT INTO created_by VALUES (30030003, 'ACTIVE', 40030001, 'Final');
+INSERT INTO created_by VALUES (30040001, 'ACTIVE', 40040001, 'Final');
+INSERT INTO created_by VALUES (30040002, 'ACTIVE', 40040001, 'Final');
+INSERT INTO created_by VALUES (30040003, 'ACTIVE', 40040001, 'Final');
+INSERT INTO created_by VALUES (30050001, 'ACTIVE', 40050001, 'Final');
+INSERT INTO created_by VALUES (30050002, 'ACTIVE', 40050001, 'Final');
+INSERT INTO created_by VALUES (30050003, 'ACTIVE', 40050001, 'Final');
+INSERT INTO created_by VALUES (30060001, 'ACTIVE', 40060001, 'Final');
+INSERT INTO created_by VALUES (30060002, 'ACTIVE', 40060001, 'Final');
+INSERT INTO created_by VALUES (30060003, 'ACTIVE', 40060001, 'Final');
+INSERT INTO created_by VALUES (30070001, 'ACTIVE', 40070001, 'Final');
+INSERT INTO created_by VALUES (30070002, 'ACTIVE', 40070001, 'Final');
+INSERT INTO created_by VALUES (30070003, 'ACTIVE', 40070001, 'Final');
+INSERT INTO created_by VALUES (30080001, 'ACTIVE', 40080001, 'Final');
+INSERT INTO created_by VALUES (30080002, 'ACTIVE', 40080001, 'Final');
+INSERT INTO created_by VALUES (30080003, 'ACTIVE', 40080001, 'Final');
+INSERT INTO created_by VALUES (30090001, 'ACTIVE', 40090001, 'Final');
+INSERT INTO created_by VALUES (30090002, 'ACTIVE', 40090001, 'Final');
+INSERT INTO created_by VALUES (30090003, 'ACTIVE', 40090001, 'Final');
+
+--UPDATED_BY
+INSERT INTO updated_by VALUES (70000001, 5000, 6000, 'Personality created');
+INSERT INTO updated_by VALUES (70010001, 5001, 6001, 'Personality created');
+INSERT INTO updated_by VALUES (70020001, 5002, 6002, 'Personality created');
+INSERT INTO updated_by VALUES (70030001, 5003, 6003, 'Personality created');
+INSERT INTO updated_by VALUES (70040001, 5004, 6004, 'Personality created');
+INSERT INTO updated_by VALUES (70050001, 5005, 6005, 'Personality created');
+INSERT INTO updated_by VALUES (70060001, 5006, 6006, 'Personality created');
+INSERT INTO updated_by VALUES (70070001, 5007, 6007, 'Personality created');
+INSERT INTO updated_by VALUES (70080001, 5008, 6008, 'Personality created');
+INSERT INTO updated_by VALUES (70090001, 5009, 6009, 'Personality created');
+
+--LOAD_TO
+INSERT INTO loads_to VALUES (40000001, 1000, 'ACTIVE');
+INSERT INTO loads_to VALUES (40010001, 1001, 'CLOSED'),
+INSERT INTO loads_to VALUES (40020001, 1002, 'ACTIVE');
+INSERT INTO loads_to VALUES (40030001, 1003, 'ACTIVE');
+INSERT INTO loads_to VALUES (40040001, 1004, 'ACTIVE');
+INSERT INTO loads_to VALUES (40050001, 1005, 'ACTIVE');
+INSERT INTO loads_to VALUES (40060001, 1006, 'ACTIVE');
+INSERT INTO loads_to VALUES (40070001, 1007, 'ACTIVE');
+INSERT INTO loads_to VALUES (40080001, 1008, 'ACTIVE');
+INSERT INTO loads_to VALUES (40090001, 1009, 'ACTIVE');
+
+--RECORDS_TO
+INSERT INTO records_to VALUES (80000001, 40000001);
+INSERT INTO records_to VALUES (80010001, 40010001);
+INSERT INTO records_to VALUES (80020001, 40020001);
+INSERT INTO records_to VALUES (80030001, 40030001);
+INSERT INTO records_to VALUES (80040001, 40040001);
+INSERT INTO records_to VALUES (80050001, 40050001);
+INSERT INTO records_to VALUES (80060001, 40060001);
+INSERT INTO records_to VALUES (80070001, 40070001);
+INSERT INTO records_to VALUES (80080001, 40080001);
+INSERT INTO records_to VALUES (80090001, 40090001);
